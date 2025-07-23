@@ -21,22 +21,30 @@ Kubernetes 資源(Resources) 是指系統中可以建立、修改和管理的對
 
 ## 工作負載資源 (Workload Resources)
 - Pod: 最小的可部署單位，包含一個或多個容器
+  - Docker 對比: 類似於 Docker 容器，但 Pod 可以包含多個容器，這些容器共享網絡和存儲命名空間，類似於 Docker 中的 --net=container 和 --volumes-from 功能。
 - Deployment: 管理 Pod 的複製和更新
+  - Docker 對比: 類似於 Docker Compose 中的服務定義，但增加了自動擴展、滾動更新等功能。
 - ReplicaSet: 確保指定數量的 Pod 副本運行
+  - Docker 對比: 相當於 Docker Compose 中的 scale 功能，但更加自動化和健壯。
 - StatefulSet: 管理有狀態應用的部署和擴展
+  - Docker 對比: 在 Docker Compose 中沒有直接對應，但類似於為有狀態服務(如數據庫)定義的服務配置，增加了穩定網絡標識和持久存儲。
 - DaemonSet: 確保所有（或部分）節點運行一個 Pod 副本
 - Job: 運行一次性任務
 - CronJob: 按照時間表運行 Job
 
 ## 服務與網路資源 (Service & Networking)
 - Service: 為一組 Pod 提供穩定的網路端點
+  - Docker 對比: 類似於 Docker Compose 中的服務發現和端口映射，但更加強大和靈活。
 - Ingress: 管理外部訪問服務的規則
 - NetworkPolicy: 定義 Pod 之間的網路隔離策略
 
 ## 配置與儲存資源 (Config & Storage)
 - ConfigMap: 存儲非機密配置數據
+  - Docker 對比: 類似於 Docker 中的環境變量或 Docker Compose 中的 environment 和 env_file 配置。
 - Secret: 存儲機密數據
+  - Docker 對比: 類似於 Docker 的環境變量，但專為敏感數據設計，有加密功能。
 - Volume: 提供 Pod 的持久化存儲
+  - Docker 對比: 直接對應 Docker 的 volumes 和 bind mounts。
 - PersistentVolume: 集群級別的存儲資源
 - PersistentVolumeClaim: 請求存儲資源
 
@@ -46,6 +54,87 @@ Kubernetes 資源(Resources) 是指系統中可以建立、修改和管理的對
 - ResourceQuota: 限制命名空間資源使用
 - Role/ClusterRole: 定義權限規則
 - RoleBinding/ClusterRoleBinding: 將角色綁定到用戶
+
+```meramid
+graph TD
+  subgraph "集群資源"
+    A[Node] -->|"運行於"| B[Namespace]
+    B -->|"限制資源使用"| C[ResourceQuota]
+    B -->|"定義權限"| D[Role/ClusterRole]
+    B -->|"關聯用戶與權限"| E[RoleBinding/ClusterRoleBinding]
+  end
+  
+  subgraph "工作負載資源"
+    F[Pod] -->|"包含"| G[Container]
+    H[Deployment] -->|"創建和管理"| I[ReplicaSet]
+    I -->|"創建和管理"| F
+    J[StatefulSet] -->|"直接管理"| F
+    K[DaemonSet] -->|"在每個節點創建"| F
+    L[Job] -->|"創建一次性"| F
+    M[CronJob] -->|"定時創建"| L
+  end
+  
+  subgraph "服務與網路"
+    N[Service] -->|"暴露和負載均衡"| F
+    O[Ingress] -->|"提供外部訪問"| N
+    P[NetworkPolicy] -->|"控制網路流量"| F
+  end
+  
+  subgraph "配置與儲存"
+    Q[ConfigMap] -->|"提供配置"| F
+    R[Secret] -->|"提供敏感配置"| F
+    S[Volume] -->|"提供存儲"| F
+    T[PersistentVolume] -->|"分配給"| U[PersistentVolumeClaim]
+    U -->|"掛載到"| F
+  end
+  
+  A ---|"調度和運行"| F
+```
+
+集群資源關係
+Node → Namespace：「運行於」- Node 是實體機器，而 Namespace 是邏輯隔離單位，Node 上運行著屬於各個 Namespace 的資源。
+
+Namespace → ResourceQuota：「限制資源使用」- ResourceQuota 定義了 Namespace 中可以使用的資源總量限制。
+
+Namespace → Role/ClusterRole：「定義權限」- Role 定義了在特定 Namespace 中的權限，ClusterRole 則定義了集群範圍的權限。
+
+Namespace → RoleBinding/ClusterRoleBinding：「關聯用戶與權限」- 這些資源將用戶或服務帳戶與角色綁定，授予相應權限。
+
+工作負載資源關係
+Pod → Container：「包含」- Pod 是最小部署單位，包含一個或多個容器。
+
+Deployment → ReplicaSet：「創建和管理」- Deployment 創建 ReplicaSet 並管理其生命週期，實現滾動更新等功能。
+
+ReplicaSet → Pod：「創建和管理」- ReplicaSet 確保指定數量的 Pod 副本運行。
+
+StatefulSet → Pod：「直接管理」- StatefulSet 直接管理 Pod，提供穩定的網絡標識和持久存儲。
+
+DaemonSet → Pod：「在每個節點創建」- DaemonSet 確保每個節點上運行一個 Pod 副本，適合節點監控、日誌收集等場景。
+
+Job → Pod：「創建一次性」- Job 創建 Pod 執行一次性任務，任務完成後 Pod 終止。
+
+CronJob → Job：「定時創建」- CronJob 按照時間表定期創建 Job。
+
+服務與網路關係
+Service → Pod：「暴露和負載均衡」- Service 為一組 Pod 提供穩定的網絡端點和負載均衡。
+
+Ingress → Service：「提供外部訪問」- Ingress 定義從集群外部訪問 Service 的規則。
+
+NetworkPolicy → Pod：「控制網路流量」- NetworkPolicy 定義 Pod 間的網絡隔離策略。
+
+配置與儲存關係
+ConfigMap → Pod：「提供配置」- ConfigMap 為 Pod 提供非敏感的配置數據。
+
+Secret → Pod：「提供敏感配置」- Secret 為 Pod 提供敏感的配置數據，如密碼、令牌等。
+
+Volume → Pod：「提供存儲」- Volume 為 Pod 提供臨時或持久的存儲空間。
+
+PersistentVolume → PersistentVolumeClaim：「分配給」- PersistentVolume 是集群中的存儲資源，通過 PersistentVolumeClaim 分配給 Pod。
+
+PersistentVolumeClaim → Pod：「掛載到」- PersistentVolumeClaim 請求存儲資源並掛載到 Pod 中。
+
+核心關係
+Node ↔ Pod：「調度和運行」- Kubernetes 調度器將 Pod 分配到 Node 上運行，Node 提供計算資源。
 
 # YAML 在 Kubernetes 中的應用
 Kubernetes 使用 YAML (或 JSON) 格式的檔案來定義資源，並使用 kubectl apply 命令部署到叢集中。
@@ -63,8 +152,6 @@ metadata:
 spec:
   # 資源特定配置
 ```
-
-
 
 apiVersion: 使用的 Kubernetes API 版本
 kind: 要創建的資源類型
@@ -85,6 +172,73 @@ spec:                 # 規格/期望狀態
     ports:            # 容器端口
     - containerPort: 80
 ```
+
+### Docker Compose YAML vs Kubernetes YAML
+```yaml
+# Docker Compose YAML
+version: '3'
+services:
+  nginx:
+    image: nginx:1.21
+    ports:
+      - "80:80"
+    volumes:
+      - ./html:/usr/share/nginx/html
+```
+
+```yaml
+# Kubernetes Pod YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.21
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: html-volume
+      mountPath: /usr/share/nginx/html
+  volumes:
+  - name: html-volume
+    hostPath:
+      path: ./html
+```
+主要區別：
+
+Docker Compose 使用 services 作為頂層鍵，而 Kubernetes 使用 kind 指定資源類型
+Kubernetes 需要 apiVersion 指定 API 版本
+Kubernetes 的 metadata 包含更多識別和分類信息
+Kubernetes 將容器定義放在 spec.containers 下，而不是頂層
+
+#### 多容器設計模式
+在 Docker Compose 中，通常每個服務都是獨立的容器。而在 Kubernetes 中，Pod 可以包含多個容器，這些容器共享網路和儲存空間，類似於 Docker 中的 network 和 volume 共享功能：
+
+```yaml
+# Kubernetes 多容器 Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-container-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.21
+  - name: log-collector
+    image: busybox
+    command: ["/bin/sh", "-c", "tail -f /var/log/nginx/access.log"]
+    volumeMounts:
+    - name: logs
+      mountPath: /var/log/nginx
+  volumes:
+  - name: logs
+    emptyDir: {}
+```
+
 
 # 實作：撰寫和部署一個簡單的 Pod YAML
 現在，讓我們創建一個簡單的 Pod YAML 文件，並使用 kubectl apply 命令部署它。

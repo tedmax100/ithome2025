@@ -61,19 +61,35 @@ date: 2025-07-20
 ##### Lab
 - 建立 Deployment，調整 replicas 數量，觀察自動擴縮容器
 
-#### Day 5：Service 與網路
+#### Day 5：Service 與 Kubernetes 網路模型
 ##### 重點
-- Service 類型（ClusterIP、NodePort、LoadBalancer）、Kubernetes 網路模型
-##### Lab
-- 建立 NodePort Service，從本機 curl 訪問服務
+Service 類型（ClusterIP、NodePort、LoadBalancer）
+Kubernetes 網路模型基礎
+KinD 內建的 CNI 介紹
 
-#### Day 6：資源管理（Label、Selector、Namespace）
+##### Lab
+部署 NodePort Service，從本機 curl 訪問服務
+測試不同 Service 類型的行為
+觀察網路封包流動
+
+#### Day 6: Flannel CNI 深入解析
+重點
+Kubernetes CNI 概念與架構
+Flannel CNI 工作原理與組件
+網路模型與封包流向
+各種後端模式比較
+Lab
+建立使用 Flannel CNI 的自訂 KinD 叢集
+測試 Pod 間通訊
+分析 Flannel 網路行為
+
+#### Day 7：資源管理（Label、Selector、Namespace）
 ##### 重點
 - Label 與 Selector 用法、Namespace 管理
 ##### Lab
 - 建立多個 Namespace，利用 Label 管理與查詢資源
 
-#### Day 7：Pod 日誌與 Debug
+#### Day 8：Pod 日誌與 Debug
 ##### 重點
 - kubectl logs、exec、describe 等指令使用
 ##### Lab
@@ -82,7 +98,7 @@ date: 2025-07-20
 ---
 
 ## 第二週：開發流程與 Skaffold 整合
-#### Day 8：自訂映像檔部署與開發工作流程
+#### Day 9：自訂映像檔部署與開發工作流程
 ##### 重點
 如何讓 KinD 使用本地 Docker 映像檔（kind load docker-image）
 開發工作流程問題：手動部署的繁瑣步驟
@@ -90,7 +106,7 @@ date: 2025-07-20
 將本地映像檔直接用於 Deployment，驗證服務可用性
 記錄開發過程中需要執行的重複步驟（建置→載入→部署→測試）
 
-#### Day 9：Skaffold 入門與快速開發循環
+#### Day 10：Skaffold 入門與快速開發循環
 ##### 重點
 Skaffold 介紹與安裝
 基本 skaffold.yaml 配置
@@ -100,17 +116,37 @@ Skaffold 介紹與安裝
 建立基本 skaffold.yaml
 使用 skaffold dev 實現程式碼變更→自動部署的開發循環
 
-#### Day 10：Skaffold 多應用開發與環境變數
+#### Day 11：KinD 進階配置管理與 Skaffold 多應用開發與環境變數
 ##### 重點
+KinD 進階配置管理
+多節點叢集設計模式與最佳實踐
+為不同應用場景定制 KinD 配置
+配置版本控制與團隊共享策略
+使用腳本自動化 KinD 環境管理
+
+Skaffold 與 KinD 配置聯動
+在 Skaffold 工作流中創建/銷毀 KinD 叢集
+使用 Skaffold hooks 管理 KinD 生命週期
+配置 Skaffold 使用特定 KinD 叢集
+
 Skaffold 多應用（前後端）設定
 結合 ConfigMap 與環境變數
 使用 Skaffold profiles 區分環境
+
 ##### Lab
 建立包含前後端的 skaffold.yaml
 使用 ConfigMap 注入環境變數
 設定 dev/staging profiles
 
-#### Day 11：Volume 與持久化儲存（整合 Skaffold）
+實作練習
+設計三種不同用途的 KinD 配置（開發、測試、模擬生產）
+創建自動化腳本管理 KinD 環境生命週期
+配置 Skaffold 與不同 KinD 環境整合
+使用 ConfigMap 為不同環境注入配置
+設計 Skaffold profiles 對應不同環境需求
+實現完整的開發-測試工作流程
+
+#### Day 12：Volume 與持久化儲存（整合 Skaffold）
 ##### 重點
 Volume、PersistentVolume、PersistentVolumeClaim 概念
 Skaffold 與持久化資料的處理

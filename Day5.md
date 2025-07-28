@@ -29,6 +29,15 @@ Kubernetes 網路模型基於以下四個基本原則：
 
 這種網路模型與傳統的 Docker 網路有很大不同。在 Docker 中，容器默認使用橋接網路，容器間通信需要通過端口映射或自定義網路。而 Kubernetes 為每個 Pod 分配一個集群內唯一的 IP 地址，使 Pod 之間可以直接通信，就像傳統的虛擬機一樣。
 
+
+# Pod 網路實現的挑戰
+實現 Kubernetes 網路模型面臨幾個主要挑戰：
+
+跨節點通信：Pod 可能分布在不同節點上，需要解決跨節點通信問題
+IP 地址管理：需要為每個 Pod 分配唯一的 IP 地址
+路由與轉發：確保數據包能正確路由到目標 Pod
+網路策略：實現網路隔離和安全控制
+
 # Container Network Interface (CNI)
 Kubernetes 使用 CNI（Container Network Interface）插件來實現其網路模型。CNI 是一個規範和一組庫，用於配置 Linux 容器的網路接口。
 

@@ -188,94 +188,105 @@ DevSpace 的狀態監控功能與 UI 儀表板
 使用 DevSpace UI 監控應用健康狀態
 
 
-#### Day 14 DevSpace 與 Helm 整合
-##### 重點
+## 第三週：Helm 與 CI/CD 整合
+
+- Day 14-16：從基礎到進階，讓學習者先掌握 Helm 核心概念
+  - 先需要部署簡單應用（Day 14）
+  - 然後需要處理複雜配置（Day 15-16）
+- Day 17-18：將 Helm 知識應用到實際的 Kubernetes 工作負載上
+  - 最後處理特殊工作負載（Day 17-18）
+
+```
+基礎 Helm 概念
+    ↓
+Chart 開發技能
+    ↓
+應用到多容器場景
+    ↓
+應用到批次作業場景
+```
+
+為 CI/CD 做準備
+Day 14-18 建立的 Chart 和配置，正好是 Day 19-20 CI/CD 要用到的
+學習者會有完整的 Chart 可以用來實作自動化部署
+
+Day 14：DevSpace 與 Helm 基礎整合
+重點
+Helm 基礎概念介紹
+Chart 結構與最佳實踐
 DevSpace 支援 Helm 部署
-Helm 基礎與 Chart 結構
-DevSpace 的 Helm 值覆寫機制
-##### Lab
+Lab
 設定 DevSpace 使用 Helm 部署應用
-建立簡單的 Helm chart 並透過 DevSpace 部署
-使用 DevSpace 的值覆寫功能適應不同環境
+建立簡單的 Helm chart
+使用 DevSpace 的值覆寫功能
 
+Day 15：Helm Chart 開發深入（上）
+重點
+Chart.yaml 與 values.yaml 設計
+模板函數與管道
+條件判斷與流程控制
+Lab
+開發完整的應用 Chart
+使用條件判斷處理不同環境
+實作常用 Helper 模板
 
----
+Day 16：Helm Chart 開發深入（下）
+重點
+依賴管理與子 Chart
+Hook 機制與生命週期
+Chart 測試與驗證
+Lab
+建立具有依賴關係的 Chart
+實作部署前後的 Hook
+編寫 Chart 測試
 
-## 第三週：Kubernetes 進階功能與開發整合
-#### Day 15：多容器 Pod 與 DevSpace 同步更新
-##### 重點
-多容器設計模式、InitContainer 用法
-DevSpace 的檔案同步（file sync）功能
-DevSpace 的選擇性同步與忽略規則
-##### Lab
-設計多容器 Pod，並在 DevSpace 中設定檔案同步
-測試程式碼變更不重建容器的快速更新
-配置同步忽略規則優化性能
+Day 17：多容器 Pod 與 DevSpace 同步更新
+重點
+多容器設計模式
+InitContainer 使用場景
+DevSpace 的檔案同步機制
+Lab
+設計多容器 Pod 的 Helm Chart
+配置 DevSpace 檔案同步
+測試熱重載功能
 
-#### Day 16：Job、CronJob 與 DevSpace 整合
-##### 重點
-批次作業（Job）、定時任務（CronJob）
-如何在開發流程中測試 Job
-DevSpace 的命令執行功能
-##### Lab
-建立 Job 與 CronJob
-使用 DevSpace 部署並測試 Job 執行
-配置 DevSpace 的命令鉤子（hooks）
+Day 18：Job 與 CronJob 的 Helm 實作
+重點
+Job 與 CronJob 的 Helm 模板
+批次作業最佳實踐
+DevSpace 的 Job 測試策略
+Lab
+建立 Job Chart
+實作 CronJob 模板
+使用 DevSpace 測試 Job
 
-
-#### ay 17：Service Account、RBAC 與開發安全性
-##### 重點
-Service Account、RBAC 權限控管
-開發環境的安全性考量
-DevSpace 的權限管理
-##### Lab
-建立 Service Account，設定簡單 RBAC 規則
-在 DevSpace 開發流程中驗證權限設定
-配置 DevSpace 使用特定 Service Account
-
-#### Day 18：自訂 Helm Chart 與 DevSpace 值覆寫
-##### 重點
-撰寫自訂 Helm Chart
-DevSpace 的 Helm 值覆寫功能
-環境特定配置管理
-
-##### Lab
-將應用包成 Helm Chart
-使用 DevSpace 的 values 或 valuesFiles 功能
-為不同環境建立特定配置
-
-
-#### Day 19：Kustomize 與 DevSpace 整合
-##### 重點
-Kustomize 基礎與用法
-DevSpace 支援 Kustomize 部署
-Kustomize 與 Helm 的混合使用
-##### Lab
-建立 Kustomize 配置
-設定 DevSpace 使用 Kustomize 部署
-結合 Helm 與 Kustomize 實現複雜配置
-
-#### Day 20：K8s Dashboard 與 DevSpace UI
-##### 重點
-在 KinD 叢集啟用 Dashboard
-DevSpace UI 儀表板功能
-DevSpace 的 port-forward 功能
-
-##### Lab
-啟用 K8s Dashboard
-設定 DevSpace 自動 port-forward
-比較 K8s Dashboard 與 DevSpace UI 的功能差異
-使用 DevSpace UI 監控開發中的應用
-
-#### Day 21：開發環境常見問題排解
-##### 重點
-DevSpace 與 KinD 常見錯誤
-排錯流程與最佳實踐
-DevSpace 的日誌和事件監控
-##### Lab
-模擬常見問題並排解（映像檔問題、網路問題等）
-使用 DevSpace UI 進行問題診斷
-配置 DevSpace 的日誌收集與分析
+Day 19：GitHub Actions 與 CI/CD（上）
+重點
+GitHub Actions 基礎
+Docker 映像檔建置流程
+自動化測試設定
+Lab
+設定基本 CI pipeline
+配置映像檔建置與推送
+實作自動化測試
+Day 20：GitHub Actions 與 CI/CD（下）
+重點
+多環境部署策略
+Helm Chart 發布流程
+版本控制與標籤管理
+Lab
+實作完整 CD 流程
+配置 Chart 發布
+自動化版本管理
+Day 21：Service Account 與 RBAC 安全性
+重點
+Service Account 設計
+RBAC 權限管理
+環境隔離策略
+Lab
+建立 Service Account
+配置 RBAC 規則
+實作環境隔離
 
 ---
 ## 第四週：CI/CD 與團隊協作

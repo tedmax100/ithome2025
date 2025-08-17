@@ -1,0 +1,66 @@
+# multi-container-pod.yaml - 多容器 Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-with-sidecar
+  labels:
+    app: web
+spec:
+  # 定義共享volume
+  volumes:
+  - name: shared-logs
+    emptyDir: {}
+  - name: config
+    configMap:
+      name: fluent-config
+
+  # 初始化容器 - 準備工作
+  initContainers:
+  - name: init-logs
+    image: busybox:1.35
+    command: ['sh', '-c', 'mkdir -p /var/log/nginx && chmod 777 /var/log/nginx']
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log/nginx
+
+  # 主要容器列表
+  containers:
+  # 主容器 - Web 服務
+  - name: web
+    image: nginx:1.29.0-otel
+    ports:
+    - containerPort: 80
+    
+    # 掛載共享日誌volume
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log/nginx
+    
+    # 自定義 nginx 配置，輸出日誌到共享volume
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo 'access_log /var/log/nginx/access.log;' > /etc/nginx/conf.d/logging.conf
+      nginx -g 'daemon off;'
+
+  # Sidecar 容器 - 日誌收集
+  - name: log-collector
+    image: fluent/fluent-bit:1.8
+    
+    # 掛載相同的日誌卷
+    volumeMounts:
+    - name: shared-logs
+      mountPath: /var/log/nginx
+      readOnly: true
+    - name: config
+      mountPath: /fluent-bit/etc
+    
+    # 資源限制
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "128Mi"
+        cpu: "100m"

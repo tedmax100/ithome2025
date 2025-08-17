@@ -1,0 +1,19 @@
+{
+  "name": "我的第一個 DevContainer",
+  "image": "mcr.microsoft.com/devcontainers/go:1.24",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go"
+      ],
+      "settings": {
+        "go.gopath": "/go"
+      }
+    }
+  },
+  
+  "forwardPorts": [8080],
+  
+  "postCreateCommand": "go version"
+}

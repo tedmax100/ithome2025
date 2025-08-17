@@ -1,334 +1,824 @@
-## 第一週：Kubernetes 基礎組件與 YAML 解析
 
-### Day 1: 為什麼後端工程師必須學習 KinD？
+# Kubernetes 學習路徑 (使用 KinD)
 
-* KinD 的定位與價值
-* 容器化開發環境的重要性
-* 本地 Kubernetes 環境對後端開發的影響
+非常好的整理！基於您的重點，我將幫您調整學習路徑，著重在 KinD、DevSpace、Helm 以及搭建前後端叢集、PostgreSQL，同時保留後半段可觀測性與混沌工程的內容。這樣的計劃更加聚焦於實用技能。
+
+## 第一週：Kubernetes 基礎與 KinD
+
+### Day 1: KinD 入門與本地開發環境設置
+
+ **學習目的** ：掌握 KinD 的安裝、配置和基本操作，建立高效的本地開發環境。
+
+ **實作內容** ：
+
+1. 安裝 KinD、kubectl 和其他必要工具
+2. 創建多節點 KinD 集群
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">kind: Cluster
+   apiVersion: kind.x-k8s.io/v1alpha4
+   nodes:
+   - role: control-plane
+     extraPortMappings:
+     - containerPort: 80
+       hostPort: 80
+     - containerPort: 443
+       hostPort: 443
+   - role: worker
+   - role: worker
+   </code></div></div></pre>
+3. 熟悉 KinD 特有命令和選項
+4. 了解 KinD 的局限性與真實集群差異
+5. 設置開發工具與 KinD 的集成 (VS Code, kubectl 插件等)
 
 ### Day 2: Kubernetes 組件架構與 YAML 基礎
 
-* Kubernetes 核心組件與架構
-* YAML 語法與結構基礎
-* Kubernetes 資源定義的共同模式
-  * apiVersion, kind, metadata, spec 等共同結構
-* 實作：分析不同類型資源的 YAML 結構差異
+ **學習目的** ：理解 Kubernetes 架構和核心組件，掌握 YAML 語法基礎。
 
-### Day 3: Pod YAML 詳解 - 容器的基本單位
+ **實作內容** ：
 
-* Pod 定義與用途
-* Pod YAML 結構深入解析
-  * 容器定義
-  * 環境變數
-  * 資源限制
-  * 重啟策略
-* 實作：創建並測試各種 Pod 設定
+1. 探索 KinD 集群中的系統組件 (`kubectl get pods -A`)
+2. 解析 YAML 語法和結構
+3. 理解 K8s 資源的共同模式 (apiVersion, kind, metadata, spec)
+4. 練習 Docker Compose 到 Kubernetes YAML 的轉換
+5. 使用 `kubectl explain` 學習資源定義
 
-### Day 4: Deployment YAML 詳解 - 應用管理與更新
+### Day 3: Pod YAML 詳解與實作
 
-* Deployment 與 ReplicaSet 關係
-* Deployment YAML 結構深入解析
-  * replicas 設定
-  * 選擇器機制
-  * 更新策略
-  * 滾動更新設定
-* 實作：部署應用並實驗不同更新策略
+ **學習目的** ：掌握 Pod 配置和生命週期管理。
 
-### Day 5: Service YAML 詳解 - 服務發現與負載均衡
+ **實作內容** ：
 
-* Service 類型與網路模型
-* Service YAML 結構深入解析
-  * 選擇器與標籤
-  * 端口映射
-  * 不同類型 Service 的配置差異
-* 實作：為應用創建不同類型的 Service 並測試
+1. 創建和管理基本 Pod
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: v1
+   kind: Pod
+   metadata:
+     name: nginx-pod
+     labels:
+       app: nginx
+   spec:
+     containers:
+     - name: nginx
+       image: nginx:alpine
+       ports:
+       - containerPort: 80
+       resources:
+         requests:
+           memory: "64Mi"
+           cpu: "100m"
+         limits:
+           memory: "128Mi"
+           cpu: "200m"
+   </code></div></div></pre>
+2. 設定容器環境變數、資源限制和存活探針
+3. 實驗多容器 Pod 設計
+4. 使用 `kubectl port-forward` 訪問 Pod
+5. 練習各種故障診斷命令
 
-### Day 6: ConfigMap 與 Secret YAML - 配置管理
+### Day 4: Deployment YAML 實作與管理
 
-* 配置與敏感資訊管理
-* ConfigMap YAML 結構與生成方式
-  * 內聯數據
-  * 檔案引用
-* Secret YAML 結構與安全考量
-* 實作：從檔案與命令生成 ConfigMap 和 Secret
+ **學習目的** ：理解 Deployment 管理 Pod 的機制，掌握應用更新策略。
 
-### Day 7: PersistentVolume 與 PVC YAML - 儲存管理
+ **實作內容** ：
 
-* Kubernetes 儲存模型
-* PersistentVolume YAML 結構
-* PersistentVolumeClaim YAML 結構
-* 儲存類 (StorageClass) 設定
-* 實作：設定持久化儲存並驗證資料保留
+1. 創建管理多副本的 Deployment
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: web-app
+   spec:
+     replicas: 3
+     selector:
+       matchLabels:
+         app: web-app
+     strategy:
+       type: RollingUpdate
+       rollingUpdate:
+         maxSurge: 1
+         maxUnavailable: 0
+     template:
+       metadata:
+         labels:
+           app: web-app
+       spec:
+         containers:
+         - name: web-app
+           image: nginx:1.19
+   </code></div></div></pre>
+2. 實施滾動更新和版本回滾
+3. 比較不同更新策略 (RollingUpdate vs Recreate)
+4. 使用標籤選擇器管理 Pod 集
+5. 監控 Deployment 狀態和事件
 
-## 第二週：高級工作負載與 DevOps 整合
+### Day 5: Service YAML 與網路模型
 
-### Day 8: StatefulSet YAML - 有狀態應用部署
+ **學習目的** ：理解 Kubernetes 服務發現和內部網路架構。
 
-* StatefulSet 使用場景與特性
-* StatefulSet YAML 結構深入解析
-  * 穩定網路標識
-  * 有序部署與更新
-  * 持久化設定
-* 實作：部署 PostgreSQL 數據庫
+ **實作內容** ：
 
-### Day 9: Job 與 CronJob YAML - 批處理工作
+1. 創建 ClusterIP Service 連接到 Deployment
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: v1
+   kind: Service
+   metadata:
+     name: web-service
+   spec:
+     selector:
+       app: web-app
+     ports:
+     - port: 80
+       targetPort: 80
+     type: ClusterIP
+   </code></div></div></pre>
+2. 設置 NodePort Service 訪問應用
+3. 測試 KinD 中的 LoadBalancer 服務 (使用 metallb)
+4. 理解服務選擇器和標籤關係
+5. 實驗服務的會話黏性和負載均衡行為
 
-* 批處理工作負載類型
-* Job YAML 結構詳解
-  * 完成與重試策略
-  * 並行處理設定
-* CronJob YAML 結構詳解
-  * 排程語法
-  * 歷史限制與並發策略
-* 實作：**使用 Flyway 進行數據庫遷移 Job**
+### Day 6: ConfigMap 與 Secret 配置管理
 
-### Day 10: Ingress YAML - 流量路由與 TLS
+ **學習目的** ：掌握應用配置和敏感信息管理的最佳實踐。
 
-* Ingress 資源與控制器
-* Ingress YAML 結構深入解析
-  * 路由規則
-  * TLS 設定
-  * 註釋 (annotations) 與控制器特定設定
-* 實作：配置 Ingress 並設定 HTTPS
+ **實作內容** ：
 
-### Day 11: NetworkPolicy YAML - 網路安全策略
+1. 創建和使用不同類型的 ConfigMap
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: app-config
+   data:
+     app.properties: |
+       environment=development
+       log.level=debug
+       feature.x=true
+     config.json: |
+       {
+         "apiUrl": "http://api-service",
+         "maxConnections": 100
+       }
+   </code></div></div></pre>
+2. 將 ConfigMap 掛載為文件和環境變數
+3. 創建並使用 Secret 存儲敏感數據
+4. 配置 Pod 使用 ConfigMap 和 Secret
+5. 測試配置更新如何影響應用行為
 
-* Kubernetes 網絡策略模型
-* NetworkPolicy YAML 結構深入解析
-  * 選擇器與標籤匹配
-  * 入站與出站規則
-  * 協議與端口設定
-* 實作：實施網絡隔離規則
+### Day 7: PersistentVolume 與 PVC 存儲管理
 
-### Day 12: HorizontalPodAutoscaler YAML - 自動擴展
+ **學習目的** ：學習 Kubernetes 持久化存儲機制。
 
-* Kubernetes 自動擴展機制
-* HPA YAML 結構深入解析
-  * 指標類型
-  * 擴展策略
-  * 冷卻期設定
-* 實作：實施 CPU 與自定義指標擴展
+ **實作內容** ：
 
-### Day 13: 資源管理 YAML - 請求與限制
+1. 在 KinD 中配置本地存儲
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: v1
+   kind: PersistentVolume
+   metadata:
+     name: local-pv
+   spec:
+     capacity:
+       storage: 1Gi
+     accessModes:
+     - ReadWriteOnce
+     persistentVolumeReclaimPolicy: Retain
+     storageClassName: standard
+     hostPath:
+       path: /tmp/data
+   </code></div></div></pre>
+2. 創建 PVC 並連接到 Pod
+3. 配置動態存儲供應 (使用 local-path-provisioner)
+4. 測試數據持久性 (刪除 Pod 後驗證數據保留)
+5. 實驗不同的訪問模式和存儲類
 
-* Kubernetes 資源模型
-* ResourceQuota YAML 結構
-* LimitRange YAML 結構
-* 實作：設定命名空間資源限制
+## 第二週：DevSpace 與高級工作負載
 
-### Day 14: Helm Chart 結構與模板
+### Day 8: DevSpace 入門與開發工作流
 
-* Helm Chart 目錄結構
-* YAML 模板化技術
-* 值覆蓋機制
-* 實作：創建可配置的應用 Chart
+ **學習目的** ：使用 DevSpace 建立高效的 Kubernetes 開發工作流。
 
-## 第三週：多環境部署與 GitOps 工作流
+ **實作內容** ：
 
-### Day 15: ConfigMap 與環境變數注入深入解析
+1. 安裝和配置 DevSpace
+2. 創建基本 DevSpace 配置文件
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">version: v2beta1
+   name: my-project
 
-* 環境變數注入方式比較
-* ConfigMap 作為環境變數來源
-* ConfigMap 作為檔案掛載
-* 實作：**將 SQL 遷移腳本存儲在 ConfigMap 中**
+   vars:
+     IMAGE: my-registry.com/my-image
 
-### Day 16: 多環境配置策略 - YAML 環境特定變化
+   pipelines:
+     dev:
+       run: |-
+         run_dependencies --all
+         create_deployments --all
+         start_dev --all
 
-* 環境分離設計模式
-* 使用 Kustomize 管理環境差異
-* Helm 值文件環境管理
-* 實作：建立開發/測試/生產環境配置
+   deployments:
+     app:
+       helm:
+         chart:
+           name: ./charts/app
+         values:
+           image: ${IMAGE}
+   </code></div></div></pre>
+3. 實現代碼與容器的熱重載
+4. 使用 DevSpace 進行本地調試
+5. 整合 DevSpace 與現有開發工具
 
-### Day 17: CI/CD 中的 YAML 生成與管理
+### Day 9: StatefulSet 與有狀態應用部署
 
-* YAML 檔案的動態生成
-* CI/CD 環境中的密鑰管理
-* 版本控制策略
-* 實作：**CI 管道中動態生成 ConfigMap**
+ **學習目的** ：理解 StatefulSet 的特性，學習部署有狀態應用。
 
-### Day 18: GitOps 工作流與 YAML 版本控制
+ **實作內容** ：
 
-* GitOps 原則
-* ArgoCD/Flux 配置結構
-* YAML 宣告式部署
-* 實作：設定基本 GitOps 管道
+1. 部署 PostgreSQL StatefulSet
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: apps/v1
+   kind: StatefulSet
+   metadata:
+     name: postgres
+   spec:
+     serviceName: postgres
+     replicas: 1
+     selector:
+       matchLabels:
+         app: postgres
+     template:
+       metadata:
+         labels:
+           app: postgres
+       spec:
+         containers:
+         - name: postgres
+           image: postgres:13
+           env:
+           - name: POSTGRES_PASSWORD
+             valueFrom:
+               secretKeyRef:
+                 name: postgres-secret
+                 key: password
+           ports:
+           - containerPort: 5432
+           volumeMounts:
+           - name: data
+             mountPath: /var/lib/postgresql/data
+     volumeClaimTemplates:
+     - metadata:
+         name: data
+       spec:
+         accessModes: ["ReadWriteOnce"]
+         resources:
+           requests:
+             storage: 1Gi
+   </code></div></div></pre>
+2. 設置 PostgreSQL 的持久化存儲
+3. 配置 Headless Service 提供穩定網絡標識
+4. 實施基本的數據庫備份和恢復策略
+5. 測試 Pod 重建後的數據持久性
+
+### Day 10: Job 與 CronJob 實作數據庫遷移
+
+ **學習目的** ：掌握批處理任務執行和數據庫遷移自動化。
+
+ **實作內容** ：
+
+1. 創建 Flyway 數據庫遷移 Job
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: batch/v1
+   kind: Job
+   metadata:
+     name: db-migration
+   spec:
+     template:
+       spec:
+         containers:
+         - name: flyway
+           image: flyway/flyway:7
+           args:
+           - -url=jdbc:postgresql://postgres:5432/mydb
+           - -user=postgres
+           - -password=$(POSTGRES_PASSWORD)
+           - -connectRetries=10
+           - migrate
+           env:
+           - name: POSTGRES_PASSWORD
+             valueFrom:
+               secretKeyRef:
+                 name: postgres-secret
+                 key: password
+           volumeMounts:
+           - name: migrations
+             mountPath: /flyway/sql
+         volumes:
+         - name: migrations
+           configMap:
+             name: db-migrations
+         restartPolicy: OnFailure
+   </code></div></div></pre>
+2. 使用 ConfigMap 存儲 SQL 遷移腳本
+3. 配置 CronJob 實施定期數據處理
+4. 實現 Job 的重試和並行執行策略
+5. 設計 Job 依賴和順序執行機制
+
+### Day 11: Ingress 部署與路由配置
+
+ **學習目的** ：學習在 KinD 環境中設置 Ingress 進行流量路由。
+
+ **實作內容** ：
+
+1. 在 KinD 中部署 Nginx Ingress Controller
+   <pre><div class="code-enhance--_fiUF hljs language-bash"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-bash" data-code-tools="">kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+   </code></div></div></pre>
+2. 配置基本 Ingress 路由
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: networking.k8s.io/v1
+   kind: Ingress
+   metadata:
+     name: app-ingress
+     annotations:
+       nginx.ingress.kubernetes.io/rewrite-target: /
+   spec:
+     rules:
+     - host: app.local
+       http:
+         paths:
+         - path: /
+           pathType: Prefix
+           backend:
+             service:
+               name: web-service
+               port:
+                 number: 80
+         - path: /api
+           pathType: Prefix
+           backend:
+             service:
+               name: api-service
+               port:
+                 number: 8080
+   </code></div></div></pre>
+3. 實現路徑重寫和重定向
+4. 配置 TLS 終止 (自簽名證書)
+5. 測試多服務路由和負載均衡
+
+### Day 12: HorizontalPodAutoscaler 自動擴展
+
+ **學習目的** ：設置基於負載的自動擴展機制。
+
+ **實作內容** ：
+
+1. 部署 Metrics Server 到 KinD 集群
+   <pre><div class="code-enhance--_fiUF hljs language-bash"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-bash" data-code-tools="">kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+   </code></div></div></pre>
+2. 配置基於 CPU 的 HPA
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: autoscaling/v2
+   kind: HorizontalPodAutoscaler
+   metadata:
+     name: api-hpa
+   spec:
+     scaleTargetRef:
+       apiVersion: apps/v1
+       kind: Deployment
+       name: api-service
+     minReplicas: 2
+     maxReplicas: 10
+     metrics:
+     - type: Resource
+       resource:
+         name: cpu
+         target:
+           type: Utilization
+           averageUtilization: 50
+   </code></div></div></pre>
+3. 創建負載測試工具生成流量
+4. 監控自動擴展行為和指標
+5. 調整 HPA 參數優化擴展性能
+
+### Day 13: NetworkPolicy 網絡安全策略
+
+ **學習目的** ：理解和實施 Kubernetes 網絡隔離。
+
+ **實作內容** ：
+
+1. 確認 KinD 使用支持 NetworkPolicy 的 CNI
+2. 創建默認拒絕策略
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: networking.k8s.io/v1
+   kind: NetworkPolicy
+   metadata:
+     name: default-deny
+     namespace: production
+   spec:
+     podSelector: {}
+     policyTypes:
+     - Ingress
+     - Egress
+   </code></div></div></pre>
+3. 實施微服務間精確通信控制
+4. 配置命名空間隔離策略
+5. 使用網絡工具測試和驗證隔離效果
+
+### Day 14: Helm Chart 入門與應用打包
+
+ **學習目的** ：使用 Helm 簡化應用部署和管理。
+
+ **實作內容** ：
+
+1. 安裝 Helm 並了解基本概念
+2. 使用現有 Chart 部署應用
+   <pre><div class="code-enhance--_fiUF hljs language-bash"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-bash" data-code-tools="">helm repo add bitnami https://charts.bitnami.com/bitnami
+   helm install my-release bitnami/nginx
+   </code></div></div></pre>
+3. 創建自定義 Helm Chart 結構
+4. 編寫模板和使用內置函數
+5. 設計不同環境的值文件 (values.yaml)
+
+## 第三週：應用架構與多環境配置
+
+### Day 15: Helm 高級模板與依賴管理
+
+ **學習目的** ：掌握 Helm 高級功能，建立複雜的應用包。
+
+ **實作內容** ：
+
+1. 編寫高級 Helm 模板 (條件、循環、函數)
+2. 管理 Chart 依賴關係
+3. 創建 Umbrella Chart 組織多服務應用
+4. 設計可重用的 Helm 庫 (Library Charts)
+5. 使用 Helm Hook 管理部署生命週期
+
+### Day 16: ConfigMap 與環境變數注入深入解析
+
+ **學習目的** ：深入理解配置管理和注入策略。
+
+ **實作內容** ：
+
+1. 比較不同環境變數注入方法
+2. 實現 SQL 遷移腳本的 ConfigMap 存儲
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: db-migrations
+   data:
+     V1__Create_tables.sql: |
+       CREATE TABLE users (
+         id SERIAL PRIMARY KEY,
+         username VARCHAR(50) NOT NULL UNIQUE,
+         email VARCHAR(100) NOT NULL
+       );
+     V2__Add_timestamps.sql: |
+       ALTER TABLE users ADD COLUMN created_at TIMESTAMP DEFAULT NOW();
+       ALTER TABLE users ADD COLUMN updated_at TIMESTAMP DEFAULT NOW();
+   </code></div></div></pre>
+3. 設計多層次配置管理策略
+4. 實現配置熱更新和應用重載
+5. 為不同環境配置不同 ConfigMap
+
+### Day 17: 前後端分離架構設計
+
+ **學習目的** ：設計和實現前後端分離的微服務架構。
+
+ **實作內容** ：
+
+1. 設計前後端分離應用架構
+2. 部署 React 前端應用
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: frontend
+   spec:
+     replicas: 2
+     selector:
+       matchLabels:
+         app: frontend
+     template:
+       metadata:
+         labels:
+           app: frontend
+       spec:
+         containers:
+         - name: frontend
+           image: my-frontend:latest
+           ports:
+           - containerPort: 80
+   </code></div></div></pre>
+3. 部署 Node.js/Java/Go 後端 API 服務
+4. 配置服務間通信和 API 訪問
+5. 實現前端與後端的整合測試
+
+### Day 18: 數據庫高可用配置與連接管理
+
+ **學習目的** ：深入理解數據庫部署和連接池配置。
+
+ **實作內容** ：
+
+1. 設計 PostgreSQL 高可用架構
+2. 配置連接池和資源限制
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: db-config
+   data:
+     db-config.properties: |
+       # Connection Pool Settings
+       maximumPoolSize=20
+       minimumIdle=5
+       connectionTimeout=30000
+       idleTimeout=600000
+       maxLifetime=1800000
+   </code></div></div></pre>
+3. 實現數據庫健康檢查和監控
+4. 設計數據庫備份和恢復流程
+5. 優化數據庫性能和資源使用
 
 ### Day 19: 從 Git 倉庫自動載入配置
 
-* Kubernetes 與外部配置來源整合
-* Git 倉庫與 Kubernetes 的橋接方式
-* 使用 Init Container 從 Git 拉取配置
-* 實作：**從 Git 倉庫載入遷移腳本**
+ **學習目的** ：實現配置與代碼分離，從外部源動態加載配置。
 
-### Day 20: Kubernetes Operator 與 CRD YAML
+ **實作內容** ：
 
-* 自定義資源定義 (CRD)
-* 控制器模式與 Operator
-* CRD YAML 結構分析
-* 實作：部署資料庫 Operator
+1. 設置配置 Git 倉庫結構
+2. 實現 InitContainer 從 Git 拉取配置
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: v1
+   kind: Pod
+   metadata:
+     name: app-with-config
+   spec:
+     initContainers:
+     - name: git-clone
+       image: alpine/git
+       command:
+       - git
+       - clone
+       - --single-branch
+       - --branch=main
+       - https://github.com/user/config-repo.git
+       - /config
+       volumeMounts:
+       - name: config-volume
+         mountPath: /config
+     containers:
+     - name: app
+       image: my-app:latest
+       volumeMounts:
+       - name: config-volume
+         mountPath: /app/config
+     volumes:
+     - name: config-volume
+       emptyDir: {}
+   </code></div></div></pre>
+3. 實現數據庫遷移腳本從 Git 加載
+4. 設計配置變更偵測機制
+5. 建立配置版本控制與回滾策略
 
-### Day 21: YAML 生成工具與最佳實踐
+### Day 20: DevSpace 高級開發工作流
 
-* YAML 生成工具比較
-* 模板引擎與程式化生成
-* YAML 質量與維護性
-* 實作：使用程式化方法生成複雜 YAML
+ **學習目的** ：建立高效的雲原生開發工作流。
 
-## 第四週：進階場景與整合
+ **實作內容** ：
 
-### Day 22: 多容器 Pod 設計模式與 YAML 配置
+1. 設置完整的 DevSpace 開發環境
+2. 配置開發、測試和生產環境設定檔
+3. 實現代碼變更熱重載
+4. 設置遠程調試和日誌流
+5. 優化構建流程和鏡像管理
 
-* Sidecar 模式
-* Ambassador 模式
-* Adapter 模式
-* 實作：實現各種多容器設計模式
+### Day 21: 完整微服務架構部署
 
-### Day 23: InitContainer 深入應用場景
+ **學習目的** ：整合所學知識，部署完整的微服務系統。
 
-* InitContainer 工作原理與生命週期
-* 依賴檢查與準備工作
-* 資源下載與初始化
-* 實作：**使用 InitContainer 從 Git 提取遷移檔案**
+ **實作內容** ：
 
-### Day 24: 容器生命週期 Hook 與 YAML 設定
+1. 設計完整的微服務拓撲
+2. 使用 Helm 部署整個應用堆疊
+   <pre><div class="code-enhance--_fiUF hljs language-bash"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-bash" data-code-tools="">helm install myapp ./myapp-chart \
+     --set frontend.replicas=2 \
+     --set api.replicas=3 \
+     --set database.storage=2Gi
+   </code></div></div></pre>
+3. 配置服務間依賴和啟動順序
+4. 實現端到端的功能測試
+5. 文檔化部署架構和流程
 
-* postStart 與 preStop 鉤子
-* 健康檢查與就緒探針
-* 啟動與結束序列設計
-* 實作：實現優雅啟動與關閉應用
+## 第四週：可觀測性與混沌工程
 
-### Day 25: 進階服務配置 - ExternalName 與 Headless Service
+### Day 22: 多容器 Pod 設計模式實踐
 
-* Headless Service 用途與配置
-* ExternalName Service 與外部整合
-* 服務發現策略
-* 實作：實現不同類型服務發現
+ **學習目的** ：掌握多容器 Pod 的高級設計模式。
 
-### Day 26: 資料庫部署與管理 YAML 最佳實踐
+ **實作內容** ：
 
-* 有狀態資料庫部署考量
-* 備份與恢復策略
-* 連接與認證配置
-* 實作：部署生產級 PostgreSQL 實例
+1. 實現日誌收集 Sidecar
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: v1
+   kind: Pod
+   metadata:
+     name: app-with-sidecar
+   spec:
+     containers:
+     - name: app
+       image: my-app:latest
+       volumeMounts:
+       - name: logs
+         mountPath: /app/logs
+     - name: log-collector
+       image: fluent/fluent-bit
+       volumeMounts:
+       - name: logs
+         mountPath: /logs
+       - name: config
+         mountPath: /fluent-bit/etc/
+     volumes:
+     - name: logs
+       emptyDir: {}
+     - name: config
+       configMap:
+         name: fluent-bit-config
+   </code></div></div></pre>
+2. 部署 Ambassador 代理容器
+3. 創建 Adapter 適配器容器
+4. 設計容器間共享和通信
+5. 實施資源管理和優先級控制
 
+### Day 23: Prometheus 與基本監控
 
-### Day 27: 完整微服務架構搭建
+ **學習目的** ：設置基本的應用監控和指標收集。
 
-* 目標：**建立一個完整的微服務示範環境**
-* 內容：
-  * 部署簡單前端應用 (React/Vue)
-  * 部署多個後端服務 (REST API)
-  * 設置 PostgreSQL 數據庫
-  * 使用 Ingress 設定路由
-  * 服務間通信配置
-* 實作：
-  * 創建完整的應用拓撲圖
-  * 部署所有組件並確保互相通信
-  * 建立端到端操作流程
-  * YAML 清單含前端、API、數據庫的完整定義
+ **實作內容** ：
 
+1. 在 KinD 中部署 Prometheus
+   <pre><div class="code-enhance--_fiUF hljs language-bash"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-bash" data-code-tools="">helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+   helm install prometheus prometheus-community/prometheus
+   </code></div></div></pre>
+2. 配置服務發現和目標選擇
+3. 為應用添加 Prometheus 指標導出
+4. 設計基本的監控儀表板
+5. 配置簡單的告警規則
 
-### Day 28: OpenTelemetry Collector 與可觀測性基礎
+### Day 24: Grafana 與可視化
 
-* 目標：**在 KinD 上建立核心可觀測性基礎設施**
-* 內容：
-  * OpenTelemetry 架構概述
-  * OpenTelemetry Collector 部署模式
-  * Collector YAML 配置詳解：
-    * 接收器 (receivers)
-    * 處理器 (processors)
-    * 導出器 (exporters)
-    * 管道 (pipelines)
-  * 接收各種格式的遙測數據
-* 實作：
-  * 部署 OpenTelemetry Operator
-  * 配置 Collector DaemonSet
-  * 設定基本數據收集管道
-  * 實現自動檢測 (auto-instrumentation) 側車注入
+ **學習目的** ：建立強大的可視化和儀表板。
 
+ **實作內容** ：
 
+1. 部署 Grafana 並連接到 Prometheus
+   <pre><div class="code-enhance--_fiUF hljs language-bash"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-bash" data-code-tools="">helm install grafana grafana/grafana
+   </code></div></div></pre>
+2. 創建應用性能儀表板
+3. 設計數據庫監控面板
+4. 配置用戶和團隊權限
+5. 設置告警通知渠道
 
-### Day 29: Grafana 堆疊部署 - Mimir, Loki, Tempo
+### Day 25: Loki 與日誌管理
 
-* 目標：**部署完整的 Grafana 可觀測性套件**
-* 內容：
-  * Grafana 作為統一觀測平台
-  * Mimir 指標存儲系統部署與配置
-    * 與 Prometheus 兼容的高可用指標系統
-    * 長期存儲與查詢優化
-  * Loki 日誌聚合系統部署與配置
-    * 標籤索引與日誌查詢
-    * 日誌流管道設定
-  * Tempo 分布式追蹤系統部署與配置
-    * 追蹤數據存儲與查詢
-    * 與 OpenTelemetry 集成
-* 實作：
-  * 使用 Helm 部署 Grafana 堆疊
-  * 配置 OTel Collector 向各系統發送數據
-  * 設定跨組件關聯 (exemplars)
-  * 建立統一的可觀測性儀表板
+ **學習目的** ：實現集中式日誌收集和分析。
 
+ **實作內容** ：
 
+1. 部署 Loki 日誌聚合系統
+   <pre><div class="code-enhance--_fiUF hljs language-bash"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-bash" data-code-tools="">helm install loki grafana/loki-stack \
+     --set grafana.enabled=false
+   </code></div></div></pre>
+2. 配置 Promtail 收集容器日誌
+3. 實現日誌過濾和標籤策略
+4. 創建日誌查詢和儀表板
+5. 設置日誌告警和異常檢測
 
-### Day 30: 可觀測性融合與應用檢測
+### Day 26: Tempo 與分布式追蹤
 
-* 目標：**將微服務應用與可觀測性堆疊集成**
-* 內容：
-  * 應用程式檢測策略：
-    * 自動檢測配置
-    * 手動檢測最佳實踐
-  * 各語言 SDK 使用方法 (Node.js, Java, Go 等)
-  * 使用 OpenTelemetry 注釋與標籤增強數據
-  * 關聯 ID 傳播和上下文管理
-  * RED 與 USE 監控方法論
-* 實作：
-  * 為所有服務啟用 OpenTelemetry 檢測
-  * 配置自定義度量導出
-  * 實現跨服務追蹤
-  * 使用 Grafana 建立完整的監控儀表板
-  * 設置多維度告警
+ **學習目的** ：實現分布式系統的追蹤和性能分析。
 
+ **實作內容** ：
 
+1. 部署 Tempo 追蹤系統
+   <pre><div class="code-enhance--_fiUF hljs language-bash"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-bash" data-code-tools="">helm install tempo grafana/tempo
+   </code></div></div></pre>
+2. 為應用添加 OpenTelemetry 檢測
+3. 實現服務間追蹤上下文傳播
+4. 創建追蹤視圖和服務圖
+5. 使用追蹤分析性能瓶頸
 
-### Day 31: xk6-disruptor 混沌測試與可觀測性驗證
+### Day 27: OpenTelemetry Collector 部署
 
-* 目標：**實施混沌工程並利用可觀測性驗證系統韌性**
-* 內容：
-  * 混沌工程原則與實踐
-  * xk6-disruptor 功能與用例：
-    * Pod 故障注入
-    * 網絡延遲與中斷
-    * 資源壓力測試
-  * k6 負載測試與 xk6-disruptor 整合
-  * 使用可觀測性數據評估系統行為
-  * 基於 SLO 的韌性測試
-* 實作：
-  * 部署 xk6-disruptor
-  * 設計混沌實驗計劃
-  * 執行網絡與資源故障注入
-  * 使用 Grafana 堆疊分析影響
-  * 制定改進建議與防護措施
+ **學習目的** ：建立統一的遙測數據收集管道。
 
+ **實作內容** ：
 
-```
-                                  [Ingress Controller]
-                                          |
-                                          v
-                [前端應用] <-----> [API Gateway/後端服務群] <-----> [PostgreSQL]
-                     ^                     ^
-                     |                     |
-                     v                     v
-             [OpenTelemetry Collector 集群]
-                     |
-          +----------+----------+
-          |          |          |
-          v          v          v
-    [Grafana]    [Mimir]     [Loki]     [Tempo]
-          ^          ^          ^          ^
-          |          |          |          |
-          +----------+----------+----------+
-                     |
-                     v
-             [xk6-disruptor]
+1. 部署 OpenTelemetry Operator
+   <pre><div class="code-enhance--_fiUF hljs language-bash"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-bash" data-code-tools="">helm install opentelemetry-operator open-telemetry/opentelemetry-operator
+   </code></div></div></pre>
+2. 配置 Collector 收集管道
+   <pre><div class="code-enhance--_fiUF hljs language-yaml"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-yaml" data-code-tools="">apiVersion: opentelemetry.io/v1alpha1
+   kind: OpenTelemetryCollector
+   metadata:
+     name: otel-collector
+   spec:
+     config: |
+       receivers:
+         otlp:
+           protocols:
+             grpc:
+             http:
+       processors:
+         batch:
+       exporters:
+         prometheus:
+           endpoint: "0.0.0.0:8889"
+         loki:
+           endpoint: "http://loki:3100/loki/api/v1/push"
+         otlp:
+           endpoint: "tempo:4317"
+           tls:
+             insecure: true
+       service:
+         pipelines:
+           metrics:
+             receivers: [otlp]
+             processors: [batch]
+             exporters: [prometheus]
+           logs:
+             receivers: [otlp]
+             processors: [batch]
+             exporters: [loki]
+           traces:
+             receivers: [otlp]
+             processors: [batch]
+             exporters: [otlp]
+   </code></div></div></pre>
+3. 實現自動檢測注入
+4. 配置多源數據收集
+5. 優化數據處理和導出
 
-```
+### Day 28: Grafana 堆疊整合
+
+ **學習目的** ：整合所有可觀測性系統，建立統一觀測平台。
+
+ **實作內容** ：
+
+1. 整合 Prometheus、Loki 和 Tempo
+2. 創建跨數據源儀表板
+3. 設置數據源關聯 (exemplars)
+4. 實施統一的告警系統
+5. 優化數據存儲和查詢性能
+
+### Day 29: 應用檢測與可觀測性最佳實踐
+
+ **學習目的** ：將應用與可觀測性堆疊深度集成。
+
+ **實作內容** ：
+
+1. 為前端應用添加 RUM (Real User Monitoring)
+2. 為後端服務實施 OpenTelemetry 檢測
+3. 實現自定義業務指標收集
+4. 配置 RED (Rate, Error, Duration) 監控
+5. 設計服務水平目標 (SLO) 監控
+
+### Day 30: xk6-disruptor 混沌測試入門
+
+ **學習目的** ：理解混沌工程原則，學習基本的故障注入。
+
+ **實作內容** ：
+
+1. 安裝 k6 和 xk6-disruptor
+2. 創建基本的負載測試腳本
+3. 設計簡單的故障注入實驗
+4. 配置 Pod 和網絡故障場景
+5. 監控故障影響和系統行為
+
+### Day 31: 高級混沌測試與韌性驗證
+
+ **學習目的** ：實施複雜的混沌實驗，驗證系統韌性。
+
+ **實作內容** ：
+
+1. 設計混沌實驗計劃和假設
+2. 實施複合故障場景
+   <pre><div class="code-enhance--_fiUF hljs language-javascript"><div class="code-enhance-header--NVMaE"><div class="code-enhance-header-right--R62yQ"><span class="code-enhance-copy--XipCY"><span>Copy</span></span></div></div><div class="code-enhance-content--fGI3Q"><code class="hljs language-javascript" data-code-tools="">import { check } from 'k6';
+   import http from 'k6/http';
+   import { PodDisruptor } from 'k6/x/disruptor';
+
+   export default function () {
+     const podDisruptor = new PodDisruptor({
+       namespace: 'default',
+       labelSelector: 'app=api-service',
+       gracePeriod: '10s',
+       duration: '30s',
+     });
+
+     podDisruptor.terminate();
+
+     // Test if system remains responsive
+     const res = http.get('http://frontend-service');
+     check(res, {
+       'is status 200': (r) => r.status === 200,
+       'response time < 500ms': (r) => r.timings.duration < 500,
+     });
+   }
+   </code></div></div></pre>
+3. 使用可觀測性堆疊監控實驗
+4. 分析系統行為和故障模式
+5. 實施改進和加固措施
+
+## 項目總結與成果展示
+
+ **學習目的** ：整合所學知識，展示完整的雲原生應用部署。
+
+ **實作內容** ：
+
+1. 完整架構文檔和拓撲圖
+2. 所有 YAML 配置的 Git 倉庫
+3. Helm Chart 包含前端、後端、數據庫和可觀測性
+4. 可觀測性儀表板和告警配置
+5. 混沌測試報告和韌性評估
+
+這個學習路徑專注於使用 KinD 作為本地環境，著重在 DevSpace、Helm 以及完整的前後端架構，並保留可觀測性和混沌工程的重要內容。同時忽略了 ArgoCD 和 Kustomize 等工具，使學習更加聚焦和高效。

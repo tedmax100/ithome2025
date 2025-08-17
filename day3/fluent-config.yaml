@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-config
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush         1
+        Log_Level     info
+        Daemon        off
+    
+    [INPUT]
+        Name              tail
+        Path              /var/log/nginx/access.log
+        Parser            nginx
+        Tag               nginx.access
+        Refresh_Interval  5
+    
+    [OUTPUT]
+        Name  stdout
+        Match *
